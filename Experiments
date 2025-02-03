@@ -1,0 +1,205 @@
+EXP 1:
+
+CODE: WAP to implement a Perceptron using numpy in Python
+
+import numpy as np
+class Perceptron:
+    def __init__(self, learning_rate=0.01, n_iters=1000):
+        self.learning_rate = learning_rate
+        self.n_iters = n_iters
+        self.activation_func = self._unit_step_func
+        self.weights = None
+        self.bias = None
+
+    def fit(self, X, y):
+        n_samples, n_features = X.shape
+        self.weights = np.zeros(n_features)
+        self.bias = 0
+
+        y_ = np.array([1 if i > 0 else 0 for i in y])
+
+        for _ in range(self.n_iters):
+            for idx, x_i in enumerate(X):
+                linear_output = np.dot(x_i, self.weights) + self.bias
+                y_predicted = self.activation_func(linear_output)
+
+                update = self.learning_rate * (y_[idx] - y_predicted)
+                self.weights += update * x_i
+                self.bias += update
+
+    def predict(self, X):
+        linear_output = np.dot(X, self.weights) + self.bias
+        y_predicted = self.activation_func(linear_output)
+        return y_predicted
+
+def _unit_step_func(self, x):
+        return np.where(x >= 0, 1, 0)
+
+# Testing the Perceptron
+if __name__ == "__main__":
+    # Importing dataset
+    from sklearn.model_selection import train_test_split
+    from sklearn import datasets
+
+    X, y = datasets.make_blobs(n_samples=150, n_features=2, centers=2, cluster_std=1.05, random_state=2)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=123)
+
+    p = Perceptron(learning_rate=0.01, n_iters=1000)
+    p.fit(X_train, y_train)
+    predictions = p.predict(X_test)
+
+    print("Perceptron classification accuracy:", (np.mean(predictions == y_test)) * 100)
+
+
+OUTPUT:
+Perceptron classification accuracy: 96.66666666666667
+
+
+
+
+EXP 2:
+CODE: WAP to implement the Gradient Descent algorithm for perceptron learning using numpy and Pandas
+import numpy as np
+import pandas as pd
+
+class PerceptronGD:
+    def __init__(self, learning_rate=0.01, n_iters=1000):
+        self.learning_rate = learning_rate
+        self.n_iters = n_iters
+        self.activation_func = self._unit_step_func
+        self.weights = None
+        self.bias = None
+
+    def fit(self, X, y):
+        n_samples, n_features = X.shape
+        self.weights = np.zeros(n_features)
+        self.bias = 0
+
+        y_ = np.array([1 if i > 0 else 0 for i in y])
+
+        for _ in range(self.n_iters):
+            linear_output = np.dot(X, self.weights) + self.bias
+            y_predicted = self.activation_func(linear_output)
+            errors = y_ - y_predicted
+
+            self.weights += self.learning_rate * np.dot(X.T, errors)
+            self.bias += self.learning_rate * np.sum(errors)
+
+    def predict(self, X):
+        linear_output = np.dot(X, self.weights) + self.bias
+        y_predicted = self.activation_func(linear_output)
+        return y_predicted
+
+    def _unit_step_func(self, x):
+        return np.where(x >= 0, 1, 0)
+
+# Testing the Perceptron with Gradient Descent
+if __name__ == "__main__":
+    # Creating a sample dataset using pandas
+    df = pd.DataFrame({
+        'feature1': np.random.randn(100),
+        'feature2': np.random.randn(100),
+        'target': np.random.choice([0, 1], size=100)
+    })
+
+    X = df[['feature1', 'feature2']].values
+    y = df['target'].values
+
+    p = PerceptronGD(learning_rate=0.01, n_iters=1000)
+    p.fit(X, y)
+    predictions = p.predict(X)
+
+    accuracy = np.mean(predictions == y) * 100
+    print( f"Perceptron GD classification accuracy: {accuracy}")
+
+OUTPUT: Perceptron GD classification accuracy: 85.0
+
+
+
+
+
+
+
+EXP 3 : 
+CODE:WAP to evaluate the performance of perceptron with linear and sigmoid activation functions for a regression and binary classification problem respectively.
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, accuracy_score
+from sklearn.datasets import make_classification, make_regression
+
+# Perceptron Class
+class Perceptron:
+    def _init_(self, input_size, activation="linear", lr=0.01, epochs=1000):
+        self.weights = np.random.randn(input_size + 1)  # +1 for bias
+        self.activation = activation
+        self.lr = lr
+        self.epochs = epochs
+
+    def activation_function(self, x):
+        if self.activation == "linear":
+            return x
+        elif self.activation == "sigmoid":
+            return 1 / (1 + np.exp(-x))
+        else:
+            raise ValueError("Invalid activation function")
+
+    def activation_derivative(self, x):
+        if self.activation == "linear":
+            return np.ones_like(x)
+        elif self.activation == "sigmoid":
+            return x * (1 - x)
+
+    def predict(self, X):
+        X = np.c_[X, np.ones(X.shape[0])]  # Add bias term
+        return self.activation_function(X @ self.weights)
+
+    def train(self, X, y):
+        X = np.c_[X, np.ones(X.shape[0])]  # Add bias term
+        for _ in range(self.epochs):
+            y_pred = self.activation_function(X @ self.weights)
+            error = y - y_pred
+            gradient = X.T @ (error * self.activation_derivative(y_pred)) / len(y)
+            self.weights += self.lr * gradient
+
+# Regression Problem
+X_reg, y_reg = make_regression(n_samples=100, n_features=1, noise=10, random_state=42)
+X_train_reg, X_test_reg, y_train_reg, y_test_reg = train_test_split(X_reg, y_reg, test_size=0.2, random_state=42)
+
+perceptron_reg = Perceptron(input_size=1, activation="linear", lr=0.01, epochs=1000)
+perceptron_reg.train(X_train_reg, y_train_reg)
+y_pred_reg = perceptron_reg.predict(X_test_reg)
+
+mse = mean_squared_error(y_test_reg, y_pred_reg)
+print(f"Regression Mean Squared Error: {mse:.4f}")
+
+plt.scatter(X_test_reg, y_test_reg, color="blue", label="Actual")
+plt.scatter(X_test_reg, y_pred_reg, color="red", label="Predicted")
+plt.title("Regression: Perceptron with Linear Activation")
+plt.legend()
+plt.show()
+
+# Classification Problem
+X_cls, y_cls = make_classification(n_samples=100, n_features=2, n_classes=2, random_state=42)
+X_train_cls, X_test_cls, y_train_cls, y_test_cls = train_test_split(X_cls, y_cls, test_size=0.2, random_state=42)
+
+perceptron_cls = Perceptron(input_size=2, activation="sigmoid", lr=0.1, epochs=1000)
+perceptron_cls.train(X_train_cls, y_train_cls)
+y_pred_cls = perceptron_cls.predict(X_test_cls)
+y_pred_cls = (y_pred_cls > 0.5).astype(int)
+
+accuracy = accuracy_score(y_test_cls, y_pred_cls)
+print(f"Classification Accuracy: {accuracy:.4f}")
+
+plt.scatter(X_test_cls[:, 0], X_test_cls[:, 1], c=y_pred_cls, cmap="coolwarm", label="Predicted")
+plt.title("Classification: Perceptron with Sigmoid Activation")
+plt.legend()
+plt.show()
+
+Output:
+	•	Regression Mean Squared Error (MSE): 104.30
+	•	Classification Accuracy: 95%
+
+
